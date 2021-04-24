@@ -1,0 +1,130 @@
+C51 COMPILER V9.60.0.0   GPIO                                                              02/05/2021 00:49:58 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE GPIO
+OBJECT MODULE PLACED IN .\Output\GPIO.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\GPIO.C OPTIMIZE(4,SPEED) BROWSE INCDIR(..\..\Include) DEFINE(FOSC_2
+                    -21184) DEBUG OBJECTEXTEND PRINT(.\LST\GPIO.lst) TABS(2) OBJECT(.\Output\GPIO.obj)
+
+line level    source
+
+   1          /* P07/AIN7 - Read input voltage
+   2             P03 - Control Servo*/
+   3          
+   4          #include "N76E885.h"
+   5          #include "Version.h"
+   6          #include "Typedef.h"
+   7          #include "Define.h"
+   8          #include "SFR_Macro.h"
+   9          #include "Common.h"
+  10          #include "Delay.h"
+  11          #include "Function_Define.h"
+  12          
+  13          #define BIT_TO_VOLTAGE 0.004887585533 //  5/1023
+  14          #define CONTROL_PIN P03
+  15          
+  16          void ADC_Config(void);
+  17          uint16_t ADC_Read(void);
+  18          void ADC_ISR (void);
+  19          void TIM2_Config(void);
+  20          void Timer2_ISR(void);
+  21          
+  22          bit BIT_TMP;
+  23          uint8_t i = 0;
+  24          uint16_t highTime = 0;
+  25          
+  26          void main(void)
+  27          {
+  28   1        float myResult = 0;
+  29   1        uint16_t adcRead = 0; 
+  30   1      
+  31   1        
+  32   1        System_Clock_Select(E_HIRCEN);   
+  33   1        ADC_Config();
+  34   1        TIM2_Config();
+  35   1        P03_PushPull_Mode;
+  36   1        
+  37   1      
+  38   1        
+  39   1        while(1)
+  40   1        { 
+  41   2          adcRead = ADC_Read();
+  42   2          myResult = (adcRead* BIT_TO_VOLTAGE);
+  43   2          Timer1_Delay1ms(50);
+  44   2          i = ((myResult/(float)5) * 10) + 1 ;
+  45   2          Timer1_Delay1ms(50);
+  46   2        }
+  47   1      }
+  48          void ADC_Config(void)
+  49          {
+  50   1        clr_VREFSEL; //VREFSEL = VDD
+  51   1        //set_VREFSEL;
+  52   1      
+  53   1        ADCCON0 |= 0x07;  //AIN7 enable
+  54   1        P07_Input_Mode;
+C51 COMPILER V9.60.0.0   GPIO                                                              02/05/2021 00:49:58 PAGE 2   
+
+  55   1        set_P07DIDS;
+  56   1        
+  57   1        /*ADC_DIV=2*/
+  58   1        clr_ADCDIV2;
+  59   1        set_ADCDIV1;
+  60   1        clr_ADCDIV0;
+  61   1        
+  62   1        set_ADCEN; //enable ADC
+  63   1      }
+  64          void TIM2_Config(void)
+  65          {
+  66   1        
+  67   1        set_EA; //enable interrupt all
+  68   1        set_ET2;  //enable interrupt timer2
+  69   1        set_TR2; //T2CON |= SET_BIT2
+  70   1        TIMER2_DIV_64;  
+  71   1        TIMER2_Auto_Reload_Delay_Mode;  //T2CON&=~SET_BIT0;T2MOD|=SET_BIT7;T2MOD|=SET_BIT3
+  72   1        RCMP2H = HIBYTE(TIMER_DIV64_VALUE_20ms);
+  73   1        RCMP2L = LOBYTE(TIMER_DIV64_VALUE_20ms);
+  74   1        TL2 = 0; TH2 = 0;
+  75   1      }
+  76          
+  77          uint16_t ADC_Read(void)
+  78          {
+  79   1        uint16_t adcValue = 0x0000;
+  80   1        
+  81   1        clr_ADCF; //clear ADC Flag
+  82   1        set_ADCS; //ADC Start
+  83   1        while(ADCF == 0);
+  84   1                         
+  85   1        adcValue = ADCRH;
+  86   1        adcValue <<= 2;
+  87   1        adcValue |= ADCRL;
+  88   1        
+  89   1        return adcValue;
+  90   1      }
+  91          void Timer2_ISR(void) interrupt 5 //timer 2 event vector number 5
+  92          {
+  93   1          //clear timer flag 2
+  94   1        clr_TF2;
+  95   1        highTime = i * 20;
+  96   1        CONTROL_PIN = 1; //high pulse
+  97   1        Delay10us(highTime);
+  98   1        CONTROL_PIN = 0;
+  99   1      }
+ 100          void ADC_ISR (void) interrupt 11
+ 101          {
+ 102   1        clr_ADCF;                               //clear ADC interrupt flag
+ 103   1      }
+ 104          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    317    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

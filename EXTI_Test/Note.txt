@@ -1,0 +1,4 @@
+- set bit EA (IE.7)
+- set bit EX0 (IE.0)
+- set IT0: TCON.0
+- ISR: clear IE0

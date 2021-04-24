@@ -1,0 +1,140 @@
+C51 COMPILER V9.60.0.0   GPIO                                                              02/28/2021 15:01:14 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE GPIO
+OBJECT MODULE PLACED IN .\Output\GPIO.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\GPIO.C OPTIMIZE(4,SPEED) BROWSE INCDIR(..\..\Include) DEFINE(FOSC_2
+                    -21184) DEBUG OBJECTEXTEND PRINT(.\LST\GPIO.lst) TABS(2) OBJECT(.\Output\GPIO.obj)
+
+line level    source
+
+   1          #include "N76E885.h"
+   2          #include "Version.h"
+   3          #include "Typedef.h"
+   4          #include "Define.h"
+   5          #include "SFR_Macro.h"
+   6          #include "Common.h"
+   7          #include "Delay.h"
+   8          #include "Function_Define.h"
+   9          #include <absacc.h>  
+  10          
+  11          #define PWM_ENABLE_ALL PIO=0xFF
+  12          
+  13          void set_PWM_Period(uint16_t valuePeriod);
+  14          void set_PWM01(uint16_t value);
+  15          void set_PWM23(uint16_t value);
+  16          void set_PWM45(uint16_t value);
+  17          void set_PWM67(uint16_t value);
+  18          void GPIO_Config();
+  19          void set_Value(uint16_t red, uint16_t green, uint16_t blue);
+  20          void RainBow(void);
+  21          
+  22          bit BIT_TMP;
+  23          
+  24          void main(void)
+  25          {
+  26   1        System_Clock_Select(E_HIRCEN); //Internal 22.1184MHz
+  27   1        GPIO_Config();
+  28   1        PWM_ENABLE_ALL; //PIO=0xFF
+  29   1        PWM_IMDEPENDENT_MODE; //PWMCON1&=0x3F
+  30   1        PWM_EDGE_TYPE;  //PWMCON1&=~SET_BIT4
+  31   1        PWM_CLOCK_FSYS; //CKCON&=0xBF 
+  32   1        PWM_CLOCK_DIV_64;
+  33   1        PWM_OUTPUT_ALL_NORMAL;  //PNP=0x00 - PWMn signal outputs directly on PWMn pin
+  34   1        
+  35   1        set_PWM_Period(4095);
+  36   1        
+  37   1        while(1)
+  38   1        {
+  39   2          //set_Value(255, 0, 102);
+  40   2          set_PWM01(255);
+  41   2          set_PWM23(512);
+  42   2          set_PWM45(1023);
+  43   2          set_PWM67(2047);
+  44   2      //    RainBow();
+  45   2        }
+  46   1        
+  47   1      }
+  48          void GPIO_Config()
+  49          {
+  50   1        P10_PushPull_Mode;  //pwm0  - r
+  51   1        P11_PushPull_Mode;  //pwm1  - r
+  52   1        P02_PushPull_Mode;  //pwm2  - g
+  53   1        P03_PushPull_Mode;  //pwm3  - g
+  54   1        P05_PushPull_Mode;  //pwm4  - b
+C51 COMPILER V9.60.0.0   GPIO                                                              02/28/2021 15:01:14 PAGE 2   
+
+  55   1        P06_PushPull_Mode;  //pwm5  - b
+  56   1        P07_PushPull_Mode;  //pwm6
+  57   1        P26_PushPull_Mode;  //pwm7  
+  58   1      }
+  59          void set_Value(uint16_t red, uint16_t green, uint16_t blue)
+  60          {
+  61   1        set_PWM01(red);
+  62   1        Timer0_Delay1ms(5);
+  63   1        set_PWM23(green);
+  64   1        Timer0_Delay1ms(5);
+  65   1        set_PWM45(blue);
+  66   1        Timer0_Delay1ms(5);
+  67   1      }
+  68          void RainBow(void)
+  69          {
+  70   1        int i = 0;
+  71   1        for(i = 0; i <= 765; i++)
+  72   1        {
+  73   2          if(i <= 255)
+  74   2            set_Value(255 - i, i, 0);
+  75   2          else if(i <= 510)
+  76   2            set_Value(0, 255 - (i-256), i - 255);
+  77   2          else
+  78   2              set_Value(i - 511, 0 , 255 - (i-511));
+  79   2        }
+  80   1      }
+  81          
+  82          void set_PWM_Period(uint16_t valuePeriod)
+  83          {
+  84   1        set_CLRPWM; //Clearing PWM 12bit counter.
+  85   1        PWMPL = LOBYTE(valuePeriod);
+  86   1        PWMPH = HIBYTE(valuePeriod);
+  87   1        set_PWMRUN; //run PWM
+  88   1      }
+  89          void set_PWM01(uint16_t value)
+  90          {
+  91   1        PWM01L = LOBYTE(value);
+  92   1        PWM01H = HIBYTE(value);
+  93   1        set_LOAD;
+  94   1      }
+  95          void set_PWM23(uint16_t value)
+  96          {
+  97   1        PWM23L = LOBYTE(value);
+  98   1        PWM23H = HIBYTE(value);
+  99   1        set_LOAD;
+ 100   1      }
+ 101          void set_PWM45(uint16_t value)
+ 102          {
+ 103   1        PWM45L = LOBYTE(value);
+ 104   1        PWM45H = HIBYTE(value);
+ 105   1        set_LOAD;
+ 106   1      }
+ 107          void set_PWM67(uint16_t value)
+ 108          {
+ 109   1        PWM67L = LOBYTE(value);
+ 110   1        PWM67H = HIBYTE(value);
+ 111   1        set_LOAD;
+ 112   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    358    ----
+C51 COMPILER V9.60.0.0   GPIO                                                              02/28/2021 15:01:14 PAGE 3   
+
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

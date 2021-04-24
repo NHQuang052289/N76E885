@@ -1,0 +1,84 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              03/09/2021 23:31:26 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(4,SPEED) BROWSE INCDIR(.\INC) DEFINE(FOSC_221184) DEBUG 
+                    -OBJECTEXTEND PRINT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "N76E885.h"
+   2          #include "Typedef.h"
+   3          #include "Define.h"
+   4          #include "SFR_Macro.h"
+   5          #include "Common.h"
+   6          #include "Delay.h"
+   7          #include "Function_Define.h"
+   8          #include "string.h"
+   9          #include <stdio.h>
+  10          
+  11          #define u8recv_buff_size 50 // Receive Buffer Size. (0 - 255)
+  12          
+  13          uint8_t xdata recv_buffer[u8recv_buff_size] = {0}; // Receive_Buffer.
+  14          bit BIT_TMP;
+  15          
+  16          void UART0_Write(char* str)
+  17          {
+  18   1        while(*str)
+  19   1        {
+  20   2          Send_Data_To_UART0(*(str++));
+  21   2        }
+  22   1      }
+  23          void UART0_Read(uint8_t* str)
+  24          {
+  25   1        uint8_t i = 0, j = 0;
+  26   1        do
+  27   1        {
+  28   2          *(str + i) = Receive_Data_From_UART0();
+  29   2          j = *(str + i);
+  30   2          i++;
+  31   2        }while(j != '\n');
+  32   1        *(str + (i-1)) = '\0';
+  33   1      }
+  34          void main(void)
+  35          {
+  36   1        uint8_t* user_msg = "\r\nStart\r\n";
+  37   1        uint8_t* crlf = "\n";
+  38   1        uint8_t user_buffer[5] = {0};
+  39   1        uint8_t len = 0;
+  40   1        P03_Quasi_Mode;//TX
+  41   1        P20_Quasi_Mode;//RX
+  42   1      
+  43   1        InitialUART0_Timer1_Type1(9600);  
+  44   1        UART0_Write(user_msg);
+  45   1      
+  46   1        while(1)
+  47   1        {
+  48   2          UART0_Read(recv_buffer);
+  49   2          
+  50   2          len = strlen(recv_buffer);
+  51   2          sprintf(user_buffer, "%d", len);
+  52   2          UART0_Write(crlf);
+  53   2          UART0_Write(user_buffer);
+  54   2          //UART0_Write(crlf);
+C51 COMPILER V9.60.0.0   MAIN                                                              03/09/2021 23:31:26 PAGE 2   
+
+  55   2          
+  56   2          UART0_Write(recv_buffer);
+  57   2        }
+  58   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    247    ----
+   CONSTANT SIZE    =     20    ----
+   XDATA SIZE       =     50    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      20
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

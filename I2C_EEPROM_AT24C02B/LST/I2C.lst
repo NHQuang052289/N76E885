@@ -1,0 +1,91 @@
+C51 COMPILER V9.60.0.0   I2C                                                               03/10/2021 23:48:03 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE I2C
+OBJECT MODULE PLACED IN .\Output\I2C.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\I2C.c OPTIMIZE(4,SPEED) BROWSE INCDIR(..\..\Include;.\Code) DEFINE(
+                    -FOSC_221184) DEBUG OBJECTEXTEND PRINT(.\LST\I2C.lst) TABS(2) OBJECT(.\Output\I2C.obj)
+
+line level    source
+
+   1          #include "I2C.h"
+   2          
+   3          void I2C_Init(void)
+   4          {
+   5   1        I2C_GPIO_ENABLE;
+   6   1        I2CLK = I2C_CLK;  //feed I2C_CLK value to I2CLK register
+   7   1        set_I2CEN;  //enable I2C module
+   8   1      }
+   9          void I2C_Start(void)
+  10          {
+  11   1        uint16_t t = timeOut;
+  12   1        set_STA; //Start condition
+  13   1        clr_SI; //clear I2C interrupt flag
+  14   1        while((SI == 0) && (t > 0))
+  15   1        {
+  16   2          t--;
+  17   2        }
+  18   1      }
+  19          void I2C_Stop(void)
+  20          {
+  21   1        uint16_t t = timeOut;
+  22   1        clr_SI; //clear I2C interrupt flag
+  23   1        set_STO;  //Stop condition
+  24   1        while((STO == 1) && (t > 0))
+  25   1        {
+  26   2          t--;
+  27   2        }
+  28   1      }
+  29          uint8_t I2C_Read(uint8_t ackMode)
+  30          {
+  31   1        uint16_t t = timeOut;
+  32   1        uint8_t value = 0x00;
+  33   1        
+  34   1        set_AA; //ACK returned
+  35   1        clr_SI;
+  36   1        while((SI == 0) && (t > 0))
+  37   1        {
+  38   2          t--;
+  39   2        }
+  40   1        
+  41   1        value = I2DAT;  //value in I2DAT register passed to variable 'value'
+  42   1        
+  43   1        if(ackMode == I2C_NACK)
+  44   1        {
+  45   2          t = timeOut;
+  46   2          clr_AA; //NACK returned
+  47   2          while((SI == 0) && (t > 0))
+  48   2          {
+  49   3            t--;
+  50   3          }
+  51   2        }
+  52   1        
+  53   1        return value;
+  54   1      }
+C51 COMPILER V9.60.0.0   I2C                                                               03/10/2021 23:48:03 PAGE 2   
+
+  55          void I2C_Write(uint8_t value)
+  56          {
+  57   1        uint16_t t = timeOut;
+  58   1        I2DAT = value;
+  59   1        clr_STA;
+  60   1        clr_SI;
+  61   1        while((SI == 0) && (t > 0))
+  62   1        {
+  63   2          t--;
+  64   2        }
+  65   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    168    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

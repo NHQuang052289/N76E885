@@ -1,0 +1,8 @@
+".\Objects\STARTUP.obj",
+".\Objects\Common.obj",
+".\Objects\Delay.obj",
+".\Objects\Version.obj",
+".\Objects\main.obj" 
+TO ".\Objects\Prj" 
+PRINT(".\Listings\Prj.m51") RAMSIZE(256) 
+DISABLEWARNING (16) 

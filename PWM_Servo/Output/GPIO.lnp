@@ -1,0 +1,8 @@
+".\Output\GPIO.obj",
+".\Output\Common.obj",
+".\Output\Delay.obj",
+".\Output\Version.obj",
+".\Output\STARTUP.obj" 
+TO ".\Output\GPIO" 
+PRINT(".\LST\GPIO.m51") RAMSIZE(256) 
+DISABLEWARNING (16) 

@@ -1,0 +1,10 @@
+*, WKT Config
+- Config WKCON register: setting diver, soure clock
+- Set auto reload: RWK register
+- set_EA, set_EWKT: enable WKT interrupt
+
+*,WKT interrupt 17
+- clear WKT flag
+- clear WKTR: WKT is halted
+
+*,NOTE: Note that the system clock frequency must be twice over WKT clock

@@ -1,0 +1,11 @@
+*********PWM*********
+*, Config
+- Ensure the 12bit up counter reset for the accuracy of the first duration: set bit CLRPWM(PWMCON0.4)
+- config period: setting PWMPH, PWMPL
+- duty cycle: setting PWMnH, PWMnL
+- trigger 12bit counter running: set bit PWMRUN (PWMCON0.7)
+- setting PIO register: enable output pwm pin
+- select mode: config PWMMOD register
+- select type: config PWMCON1.bit4
+- select clock source: setting PWMCKS (CKCON.6)
+- config pwm clock div: PWMCON[2:0]

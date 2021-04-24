@@ -1,0 +1,82 @@
+C51 COMPILER V9.60.0.0   GPIO                                                              02/05/2021 22:44:56 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE GPIO
+OBJECT MODULE PLACED IN .\Output\GPIO.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\GPIO.C OPTIMIZE(4,SPEED) BROWSE INCDIR(..\..\Include) DEFINE(FOSC_2
+                    -21184) DEBUG OBJECTEXTEND PRINT(.\LST\GPIO.lst) TABS(2) OBJECT(.\Output\GPIO.obj)
+
+line level    source
+
+   1          #include "N76E885.h"
+   2          #include "Version.h"
+   3          #include "Typedef.h"
+   4          #include "Define.h"
+   5          #include "SFR_Macro.h"
+   6          #include "Common.h"
+   7          #include "Delay.h"
+   8          #include "Function_Define.h"
+   9          #include <absacc.h>  
+  10          
+  11          void WakeUp_Config(void);
+  12          void WakeUp_Timer_ISR(void);
+  13          
+  14          bit BIT_TMP;
+  15          
+  16          void main(void)
+  17          {
+  18   1        int i = 0;
+  19   1        System_Clock_Select(E_HIRCEN);  //Internal 22.1184MHz
+  20   1        
+  21   1        P03_PushPull_Mode;
+  22   1        P04_PushPull_Mode;
+  23   1        
+  24   1        WakeUp_Config();
+  25   1        
+  26   1        while(1)
+  27   1        {
+  28   2          for(i = 0; i <= 9; i++)
+  29   2          {
+  30   3            P03 = ~P03;
+  31   3            Timer1_Delay1ms(200);
+  32   3          }
+  33   2          set_WKTR; //Wake up timer Run
+  34   2          set_PD; //Power Down mode enable
+  35   2          for(i = 0; i <= 7; i++)
+  36   2          {
+  37   3            P04 = ~P04;
+  38   3            Timer1_Delay1ms(500);
+  39   3          }
+  40   2          set_WKTR; //Wake up timer Run
+  41   2          set_PD; //Power Down mode enable
+  42   2        }
+  43   1      }
+  44          
+  45          void WakeUp_Config(void)
+  46          {
+  47   1        WKCON = 0x03; //diver wake-up = 1/64, source clock wakeUp is 10KHz internal
+  48   1        RWK = 0x00; //auto reload att 0x00
+  49   1        set_EA; //enable interrupt all
+  50   1        set_EWKT; //enable wake up interrupt
+  51   1      }
+  52          void WakeUp_Timer_ISR(void) interrupt 17
+  53          {
+  54   1        clr_WKTF; //clear interrupt flag
+C51 COMPILER V9.60.0.0   GPIO                                                              02/05/2021 22:44:56 PAGE 2   
+
+  55   1        clr_WKTR; //WakeUp is halted
+  56   1      } 
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    141    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       2
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

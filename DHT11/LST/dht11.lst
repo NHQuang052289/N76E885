@@ -1,0 +1,108 @@
+C51 COMPILER V9.60.0.0   DHT11                                                             03/13/2021 16:30:04 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE DHT11
+OBJECT MODULE PLACED IN .\Output\dht11.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\dht11.c OPTIMIZE(4,SPEED) BROWSE INCDIR(..\..\Include) DEFINE(FOSC_
+                    -221184) DEBUG OBJECTEXTEND PRINT(.\LST\dht11.lst) TABS(2) OBJECT(.\Output\dht11.obj)
+
+line level    source
+
+   1          #include "dht11.h"
+   2          #include <stdio.h>
+   3          
+   4          extern uint8_t value[5];
+   5          
+   6          void delay_us(unsigned int value)
+   7          {
+   8   1        while(value > 0)
+   9   1        {
+  10   2          nop;
+  11   2          value--;
+  12   2        }
+  13   1      }
+  14          void DHT11_Init(void)
+  15          {
+  16   1        DHT11_PIN_ENABLE;
+  17   1        Timer0_Delay1ms(1000);
+  18   1      }
+  19          uint8_t get_byte(void)
+  20          {
+  21   1        uint8_t i = 0, value = 0;
+  22   1        for(i = 0; i < 8; i++)
+  23   1        {
+  24   2          value <<= 1;
+  25   2          while(DHT11_PIN == LOW);  //bus still low
+  26   2          Delay10us(3); //neu dht11 send bit0, sau 30us chac chan bus se khong o muc High nua
+  27   2      //    delay_us(30);
+  28   2          if(DHT11_PIN == HIGH)
+  29   2          {
+  30   3            value |= 0x01;
+  31   3          }
+  32   2          while(DHT11_PIN == HIGH);   
+  33   2        }
+  34   1        return value;
+  35   1      }
+  36          uint8_t get_data(void)  //lay data vao mang value[5] va dua ra danh gia ket noi
+  37          {
+  38   1        uint8_t i = 0, checkSum = 0;
+  39   1        uint8_t check = 0;
+  40   1        
+  41   1        /*Start*/
+  42   1        DHT11_PIN_HIGH;
+  43   1        DHT11_PIN_LOW;
+  44   1        Timer0_Delay1ms(18); //giu bus o muc Low 18ms
+  45   1        DHT11_PIN_HIGH;
+  46   1        Delay10us(3); //wait for dht response
+  47   1      //  delay_us(13);
+  48   1        check = DHT11_PIN;
+  49   1      //  if(DHT11_PIN == HIGH)
+  50   1        if(check)
+  51   1        {
+  52   2          return 1; //chua thay dht11 response
+  53   2        }
+  54   1        
+C51 COMPILER V9.60.0.0   DHT11                                                             03/13/2021 16:30:04 PAGE 2   
+
+  55   1        //neu dht11 pin khac High =>> LOW => part 1 of dht11 response
+  56   1        Delay10us(8); //wait end part 1 if dht11 response
+  57   1      //  delay_us(83);
+  58   1        check = DHT11_PIN;
+  59   1      //  if(DHT11_PIN == LOW)  //bus van o muc Thap
+  60   1        if(!check)
+  61   1        {
+  62   2          return 2; //response fail
+  63   2        }
+  64   1        //neu dht11 pin khac LOW => High => part 2 of dht11 response
+  65   1        Delay10us(8); 
+  66   1      //  delay_us(80);
+  67   1        for(i = 0; i <= 4; i++)
+  68   1        {
+  69   2          value[i] = get_byte();
+  70   2        }
+  71   1        DHT11_PIN_HIGH;
+  72   1        
+  73   1        for(i = 0; i <= 3; i++)
+  74   1        {
+  75   2          checkSum += value[i];
+  76   2        }
+  77   1        printf("============\r\n");
+  78   1        printf("CS = %x\r\n", checkSum);
+  79   1      
+  80   1        if(checkSum != value[4]) return 3; //checksum error
+  81   1        else return 0;
+  82   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    241    ----
+   CONSTANT SIZE    =     25    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

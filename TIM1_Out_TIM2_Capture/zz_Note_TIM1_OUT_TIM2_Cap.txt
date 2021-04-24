@@ -1,0 +1,26 @@
+*******TIMER1 - Output Mode*******		
+*, Config
+- Enable Timer1: set_TR1
+- Enable Timer1 interrupt: set_ET1
+- Setup Clock source for Timer1: set_T1M //The clock source of Timer 1 is direct the system clock.
+- Enable timer1 mode 1: TIMER1_MODE1_ENABLE
+- TH1 = 0, TL1 = 0
+- Timer 1 output Enabled from T1 pin: P1M1 setbit 3
+
+*******TIMER2 - Auto Reload Mode*******
+*, Config Timer2
+- Enable Timer2: set_TR2
+- Select Auto-reload Mode: clear bit 0 of T2CON
+- Enable Interrupt: set_EA, set_ET2
+- T2MOD = 0x00
+
+*, Input capture setup
+- Enable IC 0: setbit 4 CAPCON0
+- select falling edge: clear bit1,0 CAPCON1
+- enable noise filter on IC0: setbit 4 CAPCON2
+- enable input capture interrupt: set_ECAP
+
+*, Input capture ISR //interrupt 12
+----Check CAPF0 (CAPCON0 & 0x01 == 1)
+- Clear Cap2 flag: clr_CAPF0
+- Execute 

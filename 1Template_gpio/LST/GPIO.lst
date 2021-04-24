@@ -1,0 +1,247 @@
+C51 COMPILER V9.60.0.0   GPIO                                                              03/18/2021 20:27:48 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE GPIO
+OBJECT MODULE PLACED IN .\Output\GPIO.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\GPIO.C OPTIMIZE(4,SPEED) BROWSE INCDIR(..\..\Include) DEFINE(FOSC_2
+                    -21184) DEBUG OBJECTEXTEND PRINT(.\LST\GPIO.lst) TABS(2) OBJECT(.\Output\GPIO.obj)
+
+line level    source
+
+   1          /*--------------------------------------------------------------------------------------------------------
+             --*/
+   2          /*                                                                                                        
+             - */
+   3          /* Copyright(c) 2015 Nuvoton Technology Corp. All rights reserved.                                        
+             - */
+   4          /*                                                                                                        
+             - */
+   5          /*--------------------------------------------------------------------------------------------------------
+             --*/
+   6          
+   7          //********************************************************************************************************
+             -***
+   8          //  Nuvoton Technoledge Corp. 
+   9          //  Website: http://www.nuvoton.com
+  10          //  E-Mail : MicroC-8bit@nuvoton.com
+  11          //  Date   : Apr/21/2015
+  12          //********************************************************************************************************
+             -***
+  13          
+  14          //********************************************************************************************************
+             -***
+  15          //  File Function: N76E885 GPIO demo code
+  16          //********************************************************************************************************
+             -***
+  17          
+  18          #include <stdio.h>
+  19          #include "N76E885.h"
+  20          #include "Version.h"
+  21          #include "Typedef.h"
+  22          #include "Define.h"
+  23          #include "SFR_Macro.h"
+  24          #include "Common.h"
+  25          #include "Delay.h"
+  26          
+  27          /*
+  28          //-------- <<< Use Configuration Wizard in Context Menu >>> ------------------
+  29          //
+  30          //<e0> System Clock Source Configuration
+  31          // <o1> System Clock Source Selection
+  32          //      <0=> 2~25MHz    XTAL
+  33          //      <1=> 32.768KHz  XTAL
+  34          //      <2=> 22.1184MHz Internal
+  35          //      <3=> 10KHz      Internal
+  36          //      <4=> OSC-In     External
+  37          //</e>
+  38          //
+  39          //<e2> Clock Divider Configuration
+  40          //     <o3.0..7>  System Clock Source Devider  <1-255:1>
+  41          //                     <i> Fsys = (System Clock Source) / (2 * Devider)
+  42          //</e>
+  43          //
+  44          // <o4> Port0 Mode Selection (P0[7:0])
+  45          //      <0=> Quasi-Bidirectional
+C51 COMPILER V9.60.0.0   GPIO                                                              03/18/2021 20:27:48 PAGE 2   
+
+  46          //      <1=> Push-Pull
+  47          //      <2=> Input-Only (high-impedance)
+  48          //      <3=> Open-Drain
+  49          //
+  50          // <o5> Port1 Mode Selection (P1[1:0])
+  51          //      <0=> Quasi-Bidirectional
+  52          //      <1=> Push-Pull
+  53          //      <2=> Input-Only (high-impedance)
+  54          //      <3=> Open-Drain
+  55          //
+  56          // <o6> Port2 Mode Selection (P2[6:0])
+  57          //      <0=> Quasi-Bidirectional
+  58          //      <1=> Push-Pull
+  59          //      <2=> Input-Only (high-impedance)
+  60          //      <3=> Open-Drain
+  61          //
+  62          // <o7> Port3 Mode Selection (P3[7:0])
+  63          //      <0=> Quasi-Bidirectional
+  64          //      <1=> Push-Pull
+  65          //      <2=> Input-Only (high-impedance)
+  66          //      <3=> Open-Drain
+  67          //-------- <<< end of configuration section >>> ------------------------------
+  68          */
+  69          
+  70          
+  71          #include <absacc.h>  
+  72          
+  73          #define SYS_CLK_EN      0
+  74          #define SYS_SEL         2
+  75          #define SYS_DIV_EN      0                   //0: Fsys=Fosc, 1: Fsys = Fosc/(2*CKDIV)
+  76          #define SYS_DIV         1
+  77          
+  78          #define PORT0_MODE      0
+  79          #define PORT1_MODE      0
+  80          #define PORT2_MODE      0
+  81          #define PORT3_MODE      0
+  82          
+  83          bit BIT_TMP;
+  84          
+  85          /*------------------------------------------------
+  86          The main C function.  Program execution starts
+  87          here after stack initialization.
+  88          ------------------------------------------------*/
+  89          void main (void) 
+  90          {
+  91   1          /* Note
+  92   1             MCU power on system clock is HIRC (22.1184MHz), so Fsys = 22.1184MHz
+  93   1          */
+  94   1          
+  95   1          Set_All_GPIO_Quasi_Mode();                   //in Common.c
+  96   1          InitialUART0_Timer1_Type1(9600);             /* 9600 Baud Rate*/
+  97   1      
+  98   1          Show_FW_Version_Number_To_PC();
+  99   1          
+ 100   1          printf ("\n*===================================================================");
+ 101   1          printf ("\n*  Name: N76E885 GPIO Toggling Demo Code.");
+ 102   1          printf ("\n*===================================================================\n");
+ 103   1      
+ 104   1          /* Change system closk source */
+ 105   1          #if SYS_CLK_EN == 1
+                      #if   SYS_SEL == 0
+                          System_Clock_Select(E_HXTEN);   //Fosc = 2~25MHz XTAL
+C51 COMPILER V9.60.0.0   GPIO                                                              03/18/2021 20:27:48 PAGE 3   
+
+                      #elif SYS_SEL == 1
+                          System_Clock_Select(E_LXTEN);   //Fosc = 32.768KHz XTAL
+                      #elif SYS_SEL == 2
+                          System_Clock_Select(E_HIRCEN);  //Fosc = 22.1184MHz Internal RC
+                      #elif SYS_SEL == 3
+                          System_Clock_Select(E_LIRCEN);  //Fosc = 10KHz Internal RC
+                      #elif SYS_SEL == 4
+                          System_Clock_Select(E_OSCEN);   //Fosc = OSC-In External OSC
+                      #endif
+                  #endif
+ 118   1          
+ 119   1          #if SYS_DIV_EN == 1
+                      CKDIV = SYS_DIV;                    //Fsys = Fosc / (2* CLKDIV) = Fcpu
+                  #endif
+ 122   1        
+ 123   1        #if 1
+ 124   1          Set_All_GPIO_Quasi_Mode();
+ 125   1        #else
+                  #if   PORT0_MODE == 0                   //Quasi-Bidirectional
+                      P0M1 = 0x00;
+                      P0M2 = 0x00;
+                  #elif PORT0_MODE == 1                   //Push-Pull
+                      P0M1 = 0x00;
+                      P0M2 = 0xFF;
+                  #elif PORT0_MODE == 2                   //Input-Only
+                      P0M1 = 0xFF;
+                      P0M2 = 0x00;
+                  #elif PORT0_MODE == 3                   //Open-Drain
+                      P0M1 = 0xFF;
+                      P0M2 = 0xFF;
+                  #endif
+              
+                  #if   PORT1_MODE == 0                   //Quasi-Bidirectional
+                      P1M1 = 0x00;
+                      P1M2 = 0x00;
+                  #elif PORT1_MODE == 1                   //Push-Pull
+                      P1M1 = 0x00;
+                      P1M2 = 0x03;
+                  #elif PORT1_MODE == 2                   //Input-Only
+                      P1M1 = 0x03;
+                      P1M2 = 0x00;
+                  #elif PORT1_MODE == 3                   //Open-Drain
+                      P1M1 = 0x03;
+                      P1M2 = 0x03;
+                  #endif
+              
+                  #if   PORT2_MODE == 0                   //Quasi-Bidirectional
+                      P2M1 = 0x00;
+                      P2M2 = 0x00;
+                  #elif PORT2_MODE == 1                   //Push-Pull
+                      P2M1 = 0x00;
+                      P2M2 = 0xFF;
+                  #elif PORT2_MODE == 2                   //Input-Only
+                      P2M1 = 0x7F;
+                      P2M2 = 0x00;
+                  #elif PORT2_MODE == 3                   //Open-Drain
+                      P2M1 = 0x7F;
+                      P2M2 = 0x7F;
+                  #endif
+              
+                  #if   PORT3_MODE == 0                   //Quasi-Bidirectional
+                      P3M1 = 0x00;
+C51 COMPILER V9.60.0.0   GPIO                                                              03/18/2021 20:27:48 PAGE 4   
+
+                      P3M2 = 0x00;
+                  #elif PORT3_MODE == 1                   //Push-Pull
+                      P3M1 = 0x00;
+                      P3M2 = 0xFF;
+                  #elif PORT3_MODE == 2                   //Input-Only
+                      P3M1 = 0xFF;
+                      P3M2 = 0x00;
+                  #elif PORT3_MODE == 3                   //Open-Drain
+                      P3M1 = 0xFF;
+                      P3M2 = 0xFF;
+                  #endif
+                #endif
+ 182   1        
+ 183   1        #define N 30
+ 184   1        
+ 185   1        while(1)
+ 186   1        {
+ 187   2              P02 = 0;
+ 188   2              Timer3_Delay1ms(N*4);
+ 189   2              P03 = 0;
+ 190   2              
+ 191   2              Timer0_Delay1ms(N*1);
+ 192   2              Timer2_Delay1ms(N*2);
+ 193   2              Timer3_Delay1ms(N*4);
+ 194   2              WakeUp_Timer_Delay25ms(1);          //Clock source is always 10KHz
+ 195   2              
+ 196   2              P02 = 1;
+ 197   2              Timer3_Delay1ms(N*4);
+ 198   2              P03 = 1;
+ 199   2              
+ 200   2              Timer0_Delay1ms(N*1);
+ 201   2              Timer2_Delay1ms(N*2);
+ 202   2              Timer3_Delay1ms(N*4);
+ 203   2              WakeUp_Timer_Delay25ms(1);          //Clock source is always 10KHz
+ 204   2          }
+ 205   1      }
+ 206          
+ 207          
+ 208          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    168    ----
+   CONSTANT SIZE    =    184    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

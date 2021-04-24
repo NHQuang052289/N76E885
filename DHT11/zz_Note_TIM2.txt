@@ -1,0 +1,12 @@
+		*******TIMER2 - Auto Reload Mode*******
+*, Config Timer2
+- Enable Timer2: set 2nd bit of T2CON (bit TR2)
+- Select Auto-reload Mode: clear bit 0 of T2CON
+- Enable Interrupt: set_EA, set_ET2
+- Clock Diver: config 4,5,6th bit of T2MOD
+- Anable Reloading register: set 7th bit of T2MOD
+- Enable Capture auto-clear: set bit 3rd of T2MOD
+
+*, Timer2 ISR //interrupt 5
+- Clear timer 2 flag: cle_TF2
+- Execute 

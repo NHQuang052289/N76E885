@@ -1,0 +1,127 @@
+C51 COMPILER V9.60.0.0   GPIO                                                              02/08/2021 23:23:29 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE GPIO
+OBJECT MODULE PLACED IN .\Output\GPIO.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\GPIO.C OPTIMIZE(4,SPEED) BROWSE INCDIR(..\..\Include) DEFINE(FOSC_2
+                    -21184) DEBUG OBJECTEXTEND PRINT(.\LST\GPIO.lst) TABS(2) OBJECT(.\Output\GPIO.obj)
+
+line level    source
+
+   1          #include "N76E885.h"
+   2          #include "Version.h"
+   3          #include "Typedef.h"
+   4          #include "Define.h"
+   5          #include "SFR_Macro.h"
+   6          #include "Common.h"
+   7          #include "Delay.h"
+   8          #include "Function_Define.h"
+   9          
+  10          #define TRIG    P21 //pin6
+  11          #define ECHO    P20 //pin5
+  12          
+  13          void GPIO_Config(void);
+  14          void TIM2_Config(void);
+  15          void Capture_Config(void);
+  16          //void Input_Capture_ISR(void);
+  17          
+  18          bit BIT_TMP;
+  19          uint16_t pulseWidth = 0;
+  20          uint16_t range = 0;
+  21          uint8_t count = 0;
+  22          uint8_t count2 = 0;
+  23          
+  24          void Input_Capture_ISR(void) interrupt 12
+  25          {
+  26   1        if(CAPCON0 & 0x01)  //IC0 flag = 1
+  27   1        {
+  28   2          count2++;
+  29   2          clr_CAPF0;
+  30   2      //    P03 = 0;
+  31   2      //    Timer3_Delay1ms(200);
+  32   2      //    P03 = 1;
+  33   2        }
+  34   1        if(CAPCON0 & 0x02)  //IC1 flag =1
+  35   1        {
+  36   2          clr_CAPF1;
+  37   2        count++;
+  38   2          pulseWidth = C1H;
+  39   2          pulseWidth <<= 8;
+  40   2          pulseWidth |= C1L;
+  41   2          
+  42   2      //    P04 = 0;
+  43   2      //    Timer3_Delay1ms(200);
+  44   2      //    P04 = 1;
+  45   2        }
+  46   1      }
+  47          
+  48          void main(void)
+  49          {
+  50   1        System_Clock_Select(E_HIRCEN); //Internal 22.1184MHz
+  51   1        GPIO_Config();
+  52   1        set_EA;
+  53   1        Capture_Config();
+  54   1        TIM2_Config();
+C51 COMPILER V9.60.0.0   GPIO                                                              02/08/2021 23:23:29 PAGE 2   
+
+  55   1      
+  56   1        
+  57   1        while(1)
+  58   1        {
+  59   2          TRIG = 1;
+  60   2          Delay10us(1);
+  61   2          TRIG = 0;
+  62   2          
+  63   2          range = ((uint16_t) (((float)pulseWidth) / 58.0));
+  64   2          Timer0_Delay1ms(500);
+  65   2        }
+  66   1      }
+  67          
+  68          void TIM2_Config(void)
+  69          {
+  70   1        RCMP2H = HIBYTE(0);
+  71   1        RCMP2L = LOBYTE(0);
+  72   1        TL2 = 0; TH2 = 0;
+  73   1        
+  74   1        //set_EA; //enable interrupt all
+  75   1        set_ET2;  //enable interrupt timer2
+  76   1        set_LDEN; //enable auto-reload for RCMP2H, RCMP2L, TH2, TL2
+  77   1        
+  78   1        T2MOD |= SET_BIT0; //Timer2 compare mode
+  79   1        TIMER2_DIV_32;
+  80   1        T2MOD |= SET_BIT3;  //auto-clear
+  81   1        
+  82   1        set_TR2; //T2CON |= SET_BIT2
+  83   1      }
+  84          void Capture_Config(void)
+  85          { 
+  86   1        CAPCON0 = 0x30; //enable input capture 1,0
+  87   1        CAPCON1 = 0x01; //IC1: rising edge detect, IC0: falling edge detect
+  88   1        CAPCON2 = 0x30; //enable noise filter on IC0,1
+  89   1        set_ECAP;
+  90   1      }
+  91          
+  92          
+  93          void GPIO_Config(void)
+  94          {
+  95   1        P21_PushPull_Mode;
+  96   1        P20_Input_Mode;
+  97   1        P03_PushPull_Mode;
+  98   1        P04_PushPull_Mode;
+  99   1      }
+ 100          
+ 101          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    190    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      6    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

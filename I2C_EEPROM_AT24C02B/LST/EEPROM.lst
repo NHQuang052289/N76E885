@@ -1,0 +1,51 @@
+C51 COMPILER V9.60.0.0   EEPROM                                                            03/10/2021 23:48:03 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE EEPROM
+OBJECT MODULE PLACED IN .\Output\EEPROM.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Code\EEPROM.c OPTIMIZE(4,SPEED) BROWSE INCDIR(..\..\Include;.\Code) DEFI
+                    -NE(FOSC_221184) DEBUG OBJECTEXTEND PRINT(.\LST\EEPROM.lst) TABS(2) OBJECT(.\Output\EEPROM.obj)
+
+line level    source
+
+   1          #include "EEPROM.h"
+   2          
+   3          void EEPROM_Write(uint8_t address, uint8_t value)
+   4          {
+   5   1        I2C_Start();
+   6   1        I2C_Write(SLAW);
+   7   1        I2C_Write(address);
+   8   1        I2C_Write(value);
+   9   1        I2C_Stop();
+  10   1      }
+  11          uint8_t EEPROM_Read(uint8_t address)
+  12          {
+  13   1        uint8_t value = 0x00;
+  14   1        
+  15   1        /*find to address in EEPROM*/
+  16   1        I2C_Start();
+  17   1        I2C_Write(SLAW);  
+  18   1        I2C_Write(address);
+  19   1        
+  20   1        /*Start Read*/
+  21   1        I2C_Start();
+  22   1        I2C_Write(SLAR);
+  23   1        value = I2C_Read(I2C_NACK);
+  24   1        I2C_Stop();
+  25   1        
+  26   1        return value;
+  27   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     65    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
